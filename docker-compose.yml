@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  chroma-db:
+    image: ghcr.io/chroma-core/chroma:latest
+    volumes:
+      - chroma-data:/chroma/chroma
+    ports:
+      - "8000:8000"
+
+  qa-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - chroma-db
+    ports:
+      - "8501:8501"
+    stdin_open: true
+    tty: true
+
+volumes:
+  chroma-data:

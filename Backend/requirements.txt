@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+websockets
+chromadb
+openai
+python-dotenv
+streamlit
+langchain
+chromadb
+langchain_community
+python-multipart
+python-dotenv
