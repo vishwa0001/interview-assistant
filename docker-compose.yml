@@ -8,16 +8,5 @@ services:
     ports:
       - "8000:8000"
 
-  qa-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    depends_on:
-      - chroma-db
-    ports:
-      - "8501:8501"
-    stdin_open: true
-    tty: true
-
 volumes:
   chroma-data:
