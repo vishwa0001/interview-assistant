@@ -30,7 +30,7 @@ async def create_session():
     session_id = str(uuid.uuid4())
     return session_id
 
-async def store_message(session_id: str, message: Message, is_audio: bool = False):
+async def store_message(session_id: str, message: Message, is_audio: bool = False, is_image: bool = False):
     timestamp = time.time()
     session_collection.add(
         documents=[message.content],
@@ -38,7 +38,7 @@ async def store_message(session_id: str, message: Message, is_audio: bool = Fals
             "role": message.role,
             "session_id": session_id,
             "timestamp": timestamp,
-            "is_audio": is_audio
+            "is_audio": is_audio,
         }],
         ids=[f"{session_id}_{uuid.uuid4()}"]
     )
@@ -52,7 +52,8 @@ async def get_messages(session_id: str):
         messages.append({
             "message": Message(role=meta["role"], content=doc),
             "timestamp": meta.get("timestamp", 0),
-            "is_audio": meta.get("is_audio", False)
+            "is_audio": meta.get("is_audio", False),
+            "is_image": meta.get("is_image", False)
         })
     messages.sort(key=lambda x: x["timestamp"])
     return messages
@@ -71,4 +72,3 @@ def transcribe_audio(audio_file_path):
     finally:
         if os.path.exists(audio_file_path):
             os.remove(audio_file_path)
-

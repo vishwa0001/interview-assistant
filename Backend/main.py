@@ -1,5 +1,6 @@
 import os
-from fastapi import FastAPI, UploadFile, Form, WebSocket, WebSocketDisconnect
+import base64
+from fastapi import HTTPException, FastAPI, UploadFile, Form, File, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from models import Message
 from database import create_session, store_message, get_messages, transcribe_audio
@@ -10,6 +11,7 @@ from openai import AsyncOpenAI
 from config import collection
 import traceback
 from collections import deque
+from typing import List, Optional
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -152,6 +154,8 @@ Bad Examples would have cliche ending like this [REJECT THIS]
 Previous Q & A:
 {previous_qa_context}
 
+context for similar questions: {context}
+
 Current Question: {question}
 
 Now craft Vishwajeet's authentic response:"""
@@ -199,55 +203,119 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
         manager.disconnect(websocket, session_id)
 
 @app.post("/send-message")
-async def send_message(sessionId: str = Form(...), message: str = Form(...)):
-    user_message = Message(role="user", content=message)
-    await store_message(sessionId, user_message)
-    await manager.broadcast(
-        sessionId,
-        {
-            "role": user_message.role,
-            "content": user_message.content,
-            "is_audio": False,
-            "is_complete": True
-        }
-    )
-
-    assistant_msg = Message(role="assistant", content="")
-    await store_message(sessionId, assistant_msg)
-    
-    accumulated_text = []
-    try:
-        async for partial_chunk in query_question_streaming(message):
-            accumulated_text.append(partial_chunk)
-            await manager.broadcast(
-                sessionId,
-                {
-                    "role": "assistant",
-                    "content": "".join(accumulated_text),
-                    "is_audio": False,
-                    "is_complete": False
-                }
+async def send_message(sessionId: str = Form(...), message: str = Form(...), files: Optional[List[UploadFile]] = File(None) ):
+    if files:
+        if len(files) > 5:
+            raise HTTPException(status_code=400, detail="Maximum 5 images allowed")
+        
+        image_payloads = []
+        for file in files:
+            image_bytes = await file.read()
+            base64_image = base64.b64encode(image_bytes).decode("utf-8")
+            image_payloads.append({
+                "type": "image_url", 
+                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
+            })
+        
+        messages_payload = [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": message},
+                    *image_payloads
+                ]
+            }
+        ]
+        
+        user_message = Message(role="user", content=message)
+        await store_message(sessionId, user_message, is_image=True)
+        await manager.broadcast(
+            sessionId,
+            {
+                "role": user_message.role,
+                "content": user_message.content,
+                "is_audio": False,
+                "is_image": True,
+                "is_complete": True
+            }
+        )
+        
+        try:
+            response = await client_op.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=messages_payload,
+                max_tokens=300
             )
-    except Exception as e:
-        error_text = f"ERROR: {str(e)}"
-        accumulated_text = [error_text]
+            final_text = response.choices[0].message.content
+        except Exception as e:
+            final_text = f"ERROR: {str(e)}"
+        
+        assistant_msg = Message(role="assistant", content=final_text)
+        await store_message(sessionId, assistant_msg, is_image=True)
+        await manager.broadcast(
+            sessionId,
+            {
+                "role": "assistant",
+                "content": final_text,
+                "is_audio": False,
+                "is_image": True,
+                "is_complete": True
+            }
+        )
+        
+        global_qa_queue.append((message, final_text))
+        return final_text
+    
+    else:
+        user_message = Message(role="user", content=message)
+        await store_message(sessionId, user_message)
+        await manager.broadcast(
+            sessionId,
+            {
+                "role": user_message.role,
+                "content": user_message.content,
+                "is_audio": False,
+                "is_complete": True
+            }
+        )
 
-    final_text = "".join(accumulated_text)
-    assistant_msg.content = final_text
-    await store_message(sessionId, assistant_msg)
-    await manager.broadcast(
-        sessionId,
-        {
-            "role": "assistant",
-            "content": final_text,
-            "is_audio": False,
-            "is_complete": True
-        }
-    )
+        assistant_msg = Message(role="assistant", content="")
+        await store_message(sessionId, assistant_msg)
+        
+        accumulated_text = []
+        try:
+            async for partial_chunk in query_question_streaming(message):
+                accumulated_text.append(partial_chunk)
+                await manager.broadcast(
+                    sessionId,
+                    {
+                        "role": "assistant",
+                        "content": "".join(accumulated_text),
+                        "is_audio": False,
+                        "is_complete": False
+                    }
+                )
+        except Exception as e:
+            error_text = f"ERROR: {str(e)}"
+            accumulated_text = [error_text]
 
-    global_qa_queue.append((message, final_text)) 
+        final_text = "".join(accumulated_text)
+        assistant_msg.content = final_text
+        await store_message(sessionId, assistant_msg)
+        await manager.broadcast(
+            sessionId,
+            {
+                "role": "assistant",
+                "content": final_text,
+                "is_audio": False,
+                "is_complete": True
+            }
+        )
 
-    return final_text
+        global_qa_queue.append((message, final_text)) 
+
+        return final_text
+
 
 @app.post("/ask-audio")
 async def ask_audio(sessionId: str = Form(...), file: UploadFile = Form(...)):
