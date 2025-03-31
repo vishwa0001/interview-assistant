@@ -16,6 +16,7 @@ import {
   FormControl,
   Select,
   InputLabel,
+  Skeleton,
   // Drawer,
   // TextareaAutosize,
 } from "@mui/material";
@@ -53,29 +54,27 @@ const App = () => {
 
   const messagesEndRef = useRef(null);
   const isPrimaryUser = useRef(false);
-  // const prevMessageLength = useRef(messages.length);
-
-  // const scrollToBottom = () => {
-  //   messagesEndRef.current?.scrollIntoView({
-  //     top: 0,
-  //     behavior: "smooth",
-  //   });
-  // };
 
   useEffect(() => {
     if (localStorage.getItem("Token")) setIsloggedIn(true);
     else setIsloggedIn(false);
   }, []);
 
-  // useEffect(() => {
-  //   const lastNonAssistantMessage = [...messages]
-  //     .reverse()
-  //     .find((msg) => msg.role !== "assistant");
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
-  //   if (lastNonAssistantMessage && messages.length > prevMessageLength.current)
-  //     scrollToBottom();
-  //   prevMessageLength.current = messages.length;
-  // }, [messages]);
+  useEffect(() => {
+    if (
+      messages.length &&
+      (messages[messages.length - 1].role !== "assistant" ||
+        messages[messages.length - 2].role !== "assistant")
+    )
+      scrollToBottom();
+  }, [messages]);
 
   const initializeSession = async () => {
     try {
@@ -121,7 +120,6 @@ const App = () => {
 
     websocket.onmessage = (event) => {
       const messageData = JSON.parse(event.data);
-
       setMessages((prevMessages) => {
         const lastMessage = prevMessages[prevMessages.length - 1];
 
@@ -133,18 +131,32 @@ const App = () => {
         ) {
           return [...prevMessages.slice(0, -1), messageData];
         }
-        const isDuplicate = prevMessages.some(
-          (msg) =>
-            msg.role === messageData.role &&
-            msg.content === messageData.content &&
-            msg.is_audio === messageData.is_audio &&
-            msg.is_complete === messageData.is_complete
-        );
-
-        if (isDuplicate) {
+        if (
+          (messageData.is_image &&
+            lastMessage.is_image &&
+            lastMessage.role === messageData.role) ||
+          (lastMessage &&
+            lastMessage.content &&
+            lastMessage.role === messageData.role &&
+            lastMessage.is_complete)
+        ) {
           return prevMessages;
         }
-        return [...prevMessages, messageData];
+        // const isDuplicate = prevMessages.some(
+        //   (msg) =>
+        //     msg.role === messageData.role &&
+        //     msg.content === messageData.content &&
+        //     msg.is_audio === messageData.is_audio &&
+        //     msg.is_complete === messageData.is_complete
+        // );
+
+        // if (isDuplicate) {
+        //   return prevMessages;
+        // }
+        if (messageData.is_image ? true : messageData.content)
+          return [...prevMessages, messageData];
+
+        return prevMessages;
       });
     };
 
@@ -275,7 +287,10 @@ const App = () => {
             <IconButton
               color="inherit"
               sx={{ mr: 1 }}
-              onClick={() => initializeSession()}
+              onClick={() => {
+                initializeSession();
+                scrollToBottom();
+              }}
             >
               <ReplayRoundedIcon />
             </IconButton>
@@ -345,10 +360,15 @@ const App = () => {
         </Button> */}
         <Box sx={{ overflowY: "auto" }}>
           <Container maxWidth="md">
-            {/* {console.log(messages)} */}
             {messages.map((msg, idx) => (
               <Box
                 key={idx}
+                ref={
+                  msg.role !== "assistant" &&
+                  (messages.length - 1 === idx || messages.length - 2 === idx)
+                    ? messagesEndRef
+                    : null
+                }
                 sx={{
                   display: "flex",
                   justifyContent:
@@ -367,27 +387,47 @@ const App = () => {
                     overflowWrap: "break-word",
                   }}
                 >
-                  {idx === messages.length - 1 && <div ref={messagesEndRef} />}
                   {msg.is_audio ? (
+                    <Typography variant="body1" sx={{ fontStyle: "italic" }}>
+                      [Audio Message]
+                    </Typography>
+                  ) : msg.is_image && msg.role !== "assistant" ? (
                     <>
                       <Typography variant="body1" sx={{ fontStyle: "italic" }}>
-                        [Audio Message]
+                        [image]
                       </Typography>
-                      {/* <div ref={messagesEndRef} /> */}
+                      {msg.content && (
+                        <Typography variant="body1">{msg.content}</Typography>
+                      )}
                     </>
                   ) : msg.role === "assistant" ? (
                     <ReactMarkdown components={components}>
                       {msg.content}
                     </ReactMarkdown>
                   ) : (
-                    <>
-                      <Typography variant="body1">{msg.content}</Typography>
-                      {/* <div ref={messagesEndRef} /> */}
-                    </>
+                    <Typography variant="body1">{msg.content}</Typography>
                   )}
                 </Box>
               </Box>
             ))}
+            {messages.length &&
+              (messages[messages.length - 1].role !== "assistant" ||
+                !messages[messages.length - 1].is_complete) && (
+                <Box
+                  sx={{
+                    height: "calc(100vh - 234px)",
+                    minHeight: "50px",
+                  }}
+                >
+                  {messages[messages.length - 1].role !== "assistant" && (
+                    <Skeleton
+                      variant="circular"
+                      width={40}
+                      height={40}
+                    />
+                  )}
+                </Box>
+              )}
             {/* <div ref={messagesEndRef} /> */}
           </Container>
         </Box>
