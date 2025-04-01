@@ -93,7 +93,7 @@ const App = () => {
 
     if (!sessionIdFromUrl) {
       const response = await fetch(
-        "https://interview-assistant.log1.com/start-session",
+        "https://api.interview-assistant.log1.com/start-session",
         {
           method: "POST",
         }
@@ -115,7 +115,7 @@ const App = () => {
 
   const setupWebSocket = (sessId) => {
     const websocket = new WebSocket(
-      `wss://interview-assistant.log1.com/ws/${sessId}`
+      `wss://api.interview-assistant.log1.com/ws/${sessId}`
     );
 
     websocket.onopen = () => {
@@ -194,7 +194,7 @@ const App = () => {
         });
       }
 
-      await fetch("https://interview-assistant.log1.com/send-message", {
+      await fetch("https://api.interview-assistant.log1.com/send-message", {
         method: "POST",
         body: formData,
       });
@@ -209,7 +209,7 @@ const App = () => {
       formData.append("sessionId", sessionId);
       formData.append("file", audioBlob, "audio.wav");
 
-      await fetch("https://interview-assistant.log1.com/ask-audio", {
+      await fetch("https://api.interview-assistant.log1.com/ask-audio", {
         method: "POST",
         body: formData,
       });
