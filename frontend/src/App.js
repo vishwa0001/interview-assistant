@@ -92,9 +92,12 @@ const App = () => {
     let sessionIdFromUrl = urlParams.get("sessionId");
 
     if (!sessionIdFromUrl) {
-      const response = await fetch("http://localhost:8001/start-session", {
-        method: "POST",
-      });
+      const response = await fetch(
+        "https://interview-assistant.log1.com/start-session",
+        {
+          method: "POST",
+        }
+      );
       const data = await response.json();
       sessionIdFromUrl = data.sessionId;
       window.history.replaceState(null, null, `?sessionId=${sessionIdFromUrl}`);
@@ -111,7 +114,9 @@ const App = () => {
   }, []);
 
   const setupWebSocket = (sessId) => {
-    const websocket = new WebSocket(`ws://localhost:8001/ws/${sessId}`);
+    const websocket = new WebSocket(
+      `wss://interview-assistant.log1.com/ws/${sessId}`
+    );
 
     websocket.onopen = () => {
       console.log("WebSocket connected");
@@ -189,7 +194,7 @@ const App = () => {
         });
       }
 
-      await fetch("http://localhost:8001/send-message", {
+      await fetch("https://interview-assistant.log1.com/send-message", {
         method: "POST",
         body: formData,
       });
@@ -204,7 +209,7 @@ const App = () => {
       formData.append("sessionId", sessionId);
       formData.append("file", audioBlob, "audio.wav");
 
-      await fetch("http://localhost:8001/ask-audio", {
+      await fetch("https://interview-assistant.log1.com/ask-audio", {
         method: "POST",
         body: formData,
       });
@@ -360,57 +365,61 @@ const App = () => {
         </Button> */}
         <Box sx={{ overflowY: "auto" }}>
           <Container maxWidth="md">
-            {messages.map((msg, idx) => (
-              <Box
-                key={idx}
-                ref={
-                  msg.role !== "assistant" &&
-                  (messages.length - 1 === idx || messages.length - 2 === idx)
-                    ? messagesEndRef
-                    : null
-                }
-                sx={{
-                  display: "flex",
-                  justifyContent:
-                    msg.role === "user" ? "flex-end" : "flex-start",
-                  mb: 2,
-                }}
-              >
+            {messages.length > 0 &&
+              messages.map((msg, idx) => (
                 <Box
+                  key={idx}
+                  ref={
+                    msg.role !== "assistant" &&
+                    (messages.length - 1 === idx || messages.length - 2 === idx)
+                      ? messagesEndRef
+                      : null
+                  }
                   sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    backgroundColor: msg.role === "user" ? "#daf1e0" : "#fff",
-                    maxWidth: "100%",
-                    width: "fit-content",
-                    boxShadow: 1,
-                    overflowWrap: "break-word",
+                    display: "flex",
+                    justifyContent:
+                      msg.role === "user" ? "flex-end" : "flex-start",
+                    mb: 2,
                   }}
                 >
-                  {msg.is_audio ? (
-                    <Typography variant="body1" sx={{ fontStyle: "italic" }}>
-                      [Audio Message]
-                    </Typography>
-                  ) : msg.is_image && msg.role !== "assistant" ? (
-                    <>
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: msg.role === "user" ? "#daf1e0" : "#fff",
+                      maxWidth: "100%",
+                      width: "fit-content",
+                      boxShadow: 1,
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    {msg.is_audio ? (
                       <Typography variant="body1" sx={{ fontStyle: "italic" }}>
-                        [image]
+                        [Audio Message]
                       </Typography>
-                      {msg.content && (
-                        <Typography variant="body1">{msg.content}</Typography>
-                      )}
-                    </>
-                  ) : msg.role === "assistant" ? (
-                    <ReactMarkdown components={components}>
-                      {msg.content}
-                    </ReactMarkdown>
-                  ) : (
-                    <Typography variant="body1">{msg.content}</Typography>
-                  )}
+                    ) : msg.is_image && msg.role !== "assistant" ? (
+                      <>
+                        <Typography
+                          variant="body1"
+                          sx={{ fontStyle: "italic" }}
+                        >
+                          [image]
+                        </Typography>
+                        {msg.content && (
+                          <Typography variant="body1">{msg.content}</Typography>
+                        )}
+                      </>
+                    ) : msg.role === "assistant" ? (
+                      <ReactMarkdown components={components}>
+                        {msg.content}
+                      </ReactMarkdown>
+                    ) : (
+                      <Typography variant="body1">{msg.content}</Typography>
+                    )}
+                  </Box>
                 </Box>
-              </Box>
-            ))}
-            {messages.length &&
+              ))}
+            {messages.length > 0 &&
               (messages[messages.length - 1].role !== "assistant" ||
                 !messages[messages.length - 1].is_complete) && (
                 <Box
@@ -420,11 +429,7 @@ const App = () => {
                   }}
                 >
                   {messages[messages.length - 1].role !== "assistant" && (
-                    <Skeleton
-                      variant="circular"
-                      width={40}
-                      height={40}
-                    />
+                    <Skeleton variant="circular" width={40} height={40} />
                   )}
                 </Box>
               )}
