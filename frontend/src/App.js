@@ -54,6 +54,8 @@ const App = () => {
 
   const messagesEndRef = useRef(null);
   const isPrimaryUser = useRef(false);
+  const apiUrl = process.env.REACT_APP_API_URL;
+  const wsUrl = process.env.REACT_APP_WS_URL;
 
   useEffect(() => {
     if (localStorage.getItem("Token")) setIsloggedIn(true);
@@ -92,12 +94,9 @@ const App = () => {
     let sessionIdFromUrl = urlParams.get("sessionId");
 
     if (!sessionIdFromUrl) {
-      const response = await fetch(
-        "https://api.interview-assistant.log1.com/start-session",
-        {
-          method: "POST",
-        }
-      );
+      const response = await fetch(`${apiUrl}/start-session`, {
+        method: "POST",
+      });
       const data = await response.json();
       sessionIdFromUrl = data.sessionId;
       window.history.replaceState(null, null, `?sessionId=${sessionIdFromUrl}`);
@@ -114,9 +113,7 @@ const App = () => {
   }, []);
 
   const setupWebSocket = (sessId) => {
-    const websocket = new WebSocket(
-      `wss://api.interview-assistant.log1.com/ws/${sessId}`
-    );
+    const websocket = new WebSocket(`${wsUrl}/${sessId}`);
 
     websocket.onopen = () => {
       console.log("WebSocket connected");
@@ -194,7 +191,7 @@ const App = () => {
         });
       }
 
-      await fetch("https://api.interview-assistant.log1.com/send-message", {
+      await fetch(`${apiUrl}/send-message`, {
         method: "POST",
         body: formData,
       });
@@ -209,7 +206,7 @@ const App = () => {
       formData.append("sessionId", sessionId);
       formData.append("file", audioBlob, "audio.wav");
 
-      await fetch("https://api.interview-assistant.log1.com/ask-audio", {
+      await fetch(`${apiUrl}/ask-audio`, {
         method: "POST",
         body: formData,
       });
