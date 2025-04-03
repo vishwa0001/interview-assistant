@@ -282,6 +282,9 @@ const App = () => {
     <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <AppBar position="static">
         <Toolbar>
+          <Box sx={{ mr: 1 }}>
+            <img src="/IA Logo.png" alt="Logo" />
+          </Box>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Interview Assistant
           </Typography>
