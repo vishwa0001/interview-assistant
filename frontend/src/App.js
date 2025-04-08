@@ -17,8 +17,7 @@ import {
   Select,
   InputLabel,
   Skeleton,
-  // Drawer,
-  // TextareaAutosize,
+  Drawer,
 } from "@mui/material";
 import {
   Send as SendIcon,
@@ -33,8 +32,9 @@ import {
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import Login from "./Login";
-import InputBox from "./InputBox";
+import Login from "./Modals/Login";
+import InputBox from "./Modals/InputBox";
+import JobInput from "./Modals/JobInput";
 
 const App = () => {
   const [messages, setMessages] = useState([]);
@@ -50,7 +50,7 @@ const App = () => {
   const [selectedDeviceId, setSelectedDeviceId] = useState("");
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [isloggedIn, setIsloggedIn] = useState(false);
-  // const [openDrawer, setOpenDrawer] = useState(false);
+  const [openDrawer, setOpenDrawer] = useState(false);
 
   const messagesEndRef = useRef(null);
   const isPrimaryUser = useRef(false);
@@ -349,20 +349,20 @@ const App = () => {
           position: "relative",
         }}
       >
-        {/* <Button
+        <Button
           onClick={() => setOpenDrawer(true)}
           color="secondary"
           variant="outlined"
           sx={{
             position: "fixed",
             top: "70",
-            left: "8px",
+            right: "8px",
             backgroundColor: "white",
             boxShadow: 2,
           }}
         >
-          Open
-        </Button> */}
+          Add job details
+        </Button>
         <Box sx={{ overflowY: "auto" }}>
           <Container maxWidth="md">
             {messages.length > 0 &&
@@ -551,14 +551,13 @@ const App = () => {
         </DialogContent>
       </Dialog>
 
-      {/* <Drawer open={openDrawer} onClose={() => setOpenDrawer(false)}>
-        <Box sx={{ p: 2 }}>
-          <Typography variant="body1">Some content</Typography>
-          <Box>
-            <TextareaAutosize minRows={4} />
-          </Box>
-        </Box>
-      </Drawer> */}
+      <Drawer
+        open={openDrawer}
+        onClose={() => setOpenDrawer(false)}
+        anchor="right"
+      >
+        <JobInput />
+      </Drawer>
     </Box>
   );
 };
