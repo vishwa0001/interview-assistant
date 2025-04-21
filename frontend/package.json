@@ -2,6 +2,92 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "main": "./electron/main.js",
+  "homepage": "./",
+  "scripts": {
+    "start": "react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "electron": "electron .",
+    "dist": "npm run build && electron-builder build --mac"
+  },
+  "build": {
+    "appId": "com.consultadd.interview.assistant",
+    "productName": "Interview Assistant",
+    "directories": {
+      "output": "dist"
+    },
+    "asar": true,
+    "files": [
+      "build/**/*",
+      "electron/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "artifactName": "Interview-Assistant-${arch}.${ext}",
+      "icon": "build/favicon.ico",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "identity": "Developer ID Application",
+      "notarize": true,
+      "protocols": {
+        "name": "interview-assistant-protocol",
+        "schemes": [
+          "interview-assistant"
+        ]
+      }
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/favicon.ico",
+      "artifactName": "Interview-Assistant-Windows-${version}.${ext}",
+      "protocols": {
+        "name": "interview-assistant-protocol",
+        "schemes": [
+          "interview-assistant"
+        ]
+      }
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "build/favicon.ico",
+      "artifactName": "Interview-Assistant-Linux-${version}.${ext}",
+      "protocols": {
+        "name": "interview-assistant-protocol",
+        "schemes": [
+          "interview-assistant"
+        ]
+      }
+    },
+    "extraMetadata": {
+      "main": "electron/main.js"
+    }
+  },
   "dependencies": {
     "@emotion/react": "^11.13.5",
     "@emotion/styled": "^11.13.5",
@@ -11,19 +97,19 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.8",
+    "dotenv": "^16.4.7",
+    "electron-log": "^5.3.3",
+    "electron-store": "^10.0.1",
+    "electron-updater": "^6.6.2",
+    "openai": "^4.93.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.3.8",
     "react-markdown": "^9.0.1",
     "react-scripts": "5.0.1",
     "react-syntax-highlighter": "^15.6.1",
+    "screenshot-desktop": "^1.15.1",
     "web-vitals": "^2.1.4"
-  },
-  "scripts": {
-    "start": "react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -42,5 +128,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "electron": "^35.1.5",
+    "electron-builder": "^26.0.12"
   }
 }

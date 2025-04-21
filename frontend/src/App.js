@@ -28,6 +28,7 @@ import {
   Logout as LogoutIcon,
   ContentCopy as ContentCopyIcon,
   ReplayRounded as ReplayRoundedIcon,
+  GroupAddRounded as GroupAddRoundedIcon,
 } from "@mui/icons-material";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -51,6 +52,8 @@ const App = () => {
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [isloggedIn, setIsloggedIn] = useState(false);
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
+  const [inputSessionId, setInputSessionId] = useState("");
 
   const messagesEndRef = useRef(null);
   const isPrimaryUser = useRef(false);
@@ -283,7 +286,7 @@ const App = () => {
       <AppBar position="static">
         <Toolbar>
           <Box sx={{ mr: 1 }}>
-            <img src="/IA Logo.png" alt="Logo" />
+            <img src="./IA Logo.png" alt="Logo" />
           </Box>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Interview Assistant
@@ -306,6 +309,15 @@ const App = () => {
           >
             {isConnected ? "Connected" : "Disconnected"}
           </Typography>
+          <Button
+            onClick={() => setJoinDialogOpen(true)}
+            title="Join with Session ID"
+            sx={{ mr: 1 }}
+            color="inherit"
+            startIcon={<GroupAddRoundedIcon />}
+          >
+            Join session
+          </Button>
           <Button
             color="inherit"
             sx={{ mr: 1 }}
@@ -524,12 +536,12 @@ const App = () => {
             }}
           >
             <Typography sx={{ flexGrow: 1 }}>
-              {`${window.location.origin}?sessionId=${sessionId}`}
+              {`https://interview-assistant.log1.com/?sessionId=${sessionId}`}
             </Typography>
             <IconButton
               onClick={() =>
                 navigator.clipboard.writeText(
-                  `${window.location.origin}?sessionId=${sessionId}`
+                  `https://interview-assistant.log1.com/?sessionId=${sessionId}`
                 )
               }
             >
@@ -549,6 +561,34 @@ const App = () => {
             setLoginDialogOpen={setLoginDialogOpen}
           />
         </DialogContent>
+      </Dialog>
+
+      <Dialog open={joinDialogOpen} onClose={() => setJoinDialogOpen(false)}>
+        <DialogTitle>Join Session</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Session ID"
+            fullWidth
+            value={inputSessionId}
+            onChange={(e) => setInputSessionId(e.target.value)}
+            margin="dense"
+            autoFocus
+            sx={{ minWidth: 400 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setJoinDialogOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              if (inputSessionId) {
+                window.location.href = `https://interview-assistant.log1.com/?sessionId=${inputSessionId}`;
+              }
+            }}
+          >
+            Join
+          </Button>
+        </DialogActions>
       </Dialog>
 
       <Drawer
