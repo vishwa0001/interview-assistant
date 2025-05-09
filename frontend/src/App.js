@@ -212,6 +212,13 @@ const App = () => {
       const formData = new FormData();
       formData.append("sessionId", sessionId);
       formData.append("file", audioBlob, "audio.wav");
+      roleInput && formData.append("role", roleInput ? roleInput : "");
+      description && formData.append("description", description ? description : "");
+      // if (images.length) {
+      //   images.forEach((image, index) => {
+      //     formData.append(`files`, image.file);
+      //   });
+      // }
 
       await fetch(`${apiUrl}/ask-audio`, {
         method: "POST",
