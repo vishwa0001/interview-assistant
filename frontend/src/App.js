@@ -190,8 +190,8 @@ const App = () => {
       const formData = new FormData();
       formData.append("sessionId", sessionId);
       formData.append("message", userMessage);
-      formData.append("role", roleInput ? roleInput : "");
-      formData.append("description", description ? description : "");
+      roleInput && formData.append("role", roleInput ? roleInput : "");
+      description && formData.append("description", description ? description : "");
       if (images.length) {
         images.forEach((image, index) => {
           formData.append(`files`, image.file);
