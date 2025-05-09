@@ -11,6 +11,7 @@ import {
   Stack,
   Dialog,
   DialogContent,
+  // Button,
 } from "@mui/material";
 import {
   Send as SendIcon,
@@ -29,12 +30,16 @@ const InputBox = ({
   selectedDeviceId,
   setSelectedDeviceId,
   audioDevices = [],
-
+  roleInput,
+  setRoleInput,
+  description,
+  setDescription,
   handleInputSubmit,
 }) => {
   const [images, setImages] = useState([]);
   const [imagePreview, setImagePreview] = useState("");
   const [inputText, setInputText] = useState("");
+  // const [roleInput, setRoleInput] = useState("");
   const fileInputRef = useRef(null);
   const historyRef = useRef([""]);
   const undoIndexRef = useRef(0);
@@ -165,6 +170,32 @@ const InputBox = ({
               ))}
             </Select>
           </FormControl>
+          <TextField
+            sx={{ ml: 2, width: "100%" }}
+            label="Enter Role"
+            variant="outlined"
+            value={roleInput}
+            onChange={(e) => setRoleInput(e.target.value)}
+          />
+
+          {/* Submit button */}
+          {/* <Button
+            sx={{ ml: 2 }}
+            variant="contained"
+            color="primary"
+            onClick={setRole}
+          >
+            Set
+          </Button> */}
+        </Box>
+        <Box>
+          <TextField
+            sx={{ mb: 1, width: "100%" }}
+            label="Enter description"
+            variant="outlined"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
         </Box>
         <Box
           sx={{

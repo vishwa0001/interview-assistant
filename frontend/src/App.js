@@ -54,6 +54,8 @@ const App = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [inputSessionId, setInputSessionId] = useState("");
+  const [roleInput, setRoleInput] = useState("");
+  const [description, setDescription] = useState("");
 
   const messagesEndRef = useRef(null);
   const isPrimaryUser = useRef(false);
@@ -188,6 +190,8 @@ const App = () => {
       const formData = new FormData();
       formData.append("sessionId", sessionId);
       formData.append("message", userMessage);
+      formData.append("role", roleInput ? roleInput : "");
+      formData.append("description", description ? description : "");
       if (images.length) {
         images.forEach((image, index) => {
           formData.append(`files`, image.file);
@@ -361,7 +365,7 @@ const App = () => {
           position: "relative",
         }}
       >
-        <Button
+        {/* <Button
           onClick={() => setOpenDrawer(true)}
           color="secondary"
           variant="outlined"
@@ -374,7 +378,7 @@ const App = () => {
           }}
         >
           Add job details
-        </Button>
+        </Button> */}
         <Box sx={{ overflowY: "auto" }}>
           <Container maxWidth="md">
             {messages.length > 0 &&
@@ -460,6 +464,10 @@ const App = () => {
           startRecording={startRecording}
           stopRecording={stopRecording}
           handleInputSubmit={handleInputSubmit}
+          roleInput={roleInput}
+          setRoleInput={setRoleInput}
+          description={description}
+          setDescription={setDescription}
         />
       )}
 
