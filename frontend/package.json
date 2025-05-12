@@ -10,7 +10,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron": "electron .",
-    "dist": "npm run build && electron-builder build --mac"
+    "dist": "npm run build && electron-builder build --mac",
+    "package-win": "npm run build && electron-builder build --win"
   },
   "build": {
     "appId": "com.consultadd.interview.assistant",
