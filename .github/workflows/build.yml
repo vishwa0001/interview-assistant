@@ -1,0 +1,47 @@
+name: Build Electron App (Windows)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Build React app
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Set up Wine for Windows packaging
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt update
+          sudo apt install wine64 wine32 -y
+
+      - name: Package Electron app for Windows
+        run: |
+          cd frontend
+          npm run package-win
+        env:
+          ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES: true
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-installer
+          path: frontend/dist/*.exe
