@@ -45,7 +45,8 @@ jobs:
           ls -la frontend/dist
 
       - name: Upload installer artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v3
         with:
           name: windows-installer
-          path: frontend/dist/Interview-Assistant-Windows-*.exe
+          path: frontend/dist/**/*.exe
+
