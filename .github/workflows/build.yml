@@ -26,6 +26,11 @@ jobs:
           cd frontend
           npm run build
 
+      - name: Install Electron dependencies
+        run: |
+          cd frontend
+          npm install electron electron-builder --save-dev
+
       - name: Set up Wine for Windows packaging
         run: |
           sudo dpkg --add-architecture i386
@@ -44,4 +49,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: windows-installer
-          path: frontend/dist/*.exe
+          path: frontend/dist/**/*.exe
