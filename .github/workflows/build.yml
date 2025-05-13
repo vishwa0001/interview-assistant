@@ -39,9 +39,13 @@ jobs:
         env:
           ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES: true
           CSC_IDENTITY_AUTO_DISCOVERY: false
+          
+      - name: List files in dist directory (debugging)
+        run: |
+          ls -la frontend/dist
 
       - name: Upload installer artifact
         uses: actions/upload-pages-artifact@v3
         with:
           name: windows-installer
-          path: frontend/dist/*.exe
+          path: frontend/dist/Interview-Assistant-Windows-*.exe
