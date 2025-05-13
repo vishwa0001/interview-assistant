@@ -62,6 +62,8 @@ const App = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const wsUrl = process.env.REACT_APP_WS_URL;
 
+  console.log(socket);
+
   useEffect(() => {
     if (localStorage.getItem("Token")) setIsloggedIn(true);
     else setIsloggedIn(false);
