@@ -76,14 +76,14 @@ const App = () => {
     });
   };
 
-  useEffect(() => {
-    if (
-      messages.length &&
-      (messages[messages.length - 1].role !== "assistant" ||
-        messages[messages.length - 2].role !== "assistant")
-    )
-      scrollToBottom();
-  }, [messages]);
+  // useEffect(() => {
+  //   if (
+  //     messages.length &&
+  //     (messages[messages.length - 1].role !== "assistant" ||
+  //       messages[messages.length - 2].role !== "assistant")
+  //   )
+  //     scrollToBottom();
+  // }, [messages]);
 
   const initializeSession = async () => {
     try {
