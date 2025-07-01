@@ -76,14 +76,14 @@ const App = () => {
     });
   };
 
-  // useEffect(() => {
-  //   if (
-  //     messages.length &&
-  //     (messages[messages.length - 1].role !== "assistant" ||
-  //       messages[messages.length - 2].role !== "assistant")
-  //   )
-  //     scrollToBottom();
-  // }, [messages]);
+  useEffect(() => {
+    // if (
+    //   messages.length &&
+    //   (messages[messages.length - 1].role !== "assistant" ||
+    //     messages[messages.length - 2].role !== "assistant")
+    // )
+      scrollToBottom();
+  }, [messages]);
 
   const initializeSession = async () => {
     try {
@@ -369,7 +369,6 @@ const App = () => {
         sx={{
           flex: 1,
           overflowY: "auto",
-          p: 2,
           backgroundColor: "#f0f0f0",
           position: "relative",
         }}
@@ -395,10 +394,11 @@ const App = () => {
                 <Box
                   key={idx}
                   ref={
-                    msg.role !== "assistant" &&
-                    (messages.length - 1 === idx || messages.length - 2 === idx)
-                      ? messagesEndRef
-                      : null
+                    // msg.role !== "assistant" &&
+                    // (messages.length - 1 === idx || messages.length - 2 === idx)
+                    //   ?
+                    messagesEndRef
+                    // : null
                   }
                   sx={{
                     display: "flex",
@@ -435,9 +435,11 @@ const App = () => {
                         )}
                       </>
                     ) : msg.role === "assistant" ? (
-                      <ReactMarkdown components={components}>
-                        {msg.content}
-                      </ReactMarkdown>
+                      <div sx={{ height: "calc(100vh - 300px)" }}>
+                        <ReactMarkdown components={components}>
+                          {msg.content}
+                        </ReactMarkdown>
+                      </div>
                     ) : (
                       <Typography variant="body1">{msg.content}</Typography>
                     )}
